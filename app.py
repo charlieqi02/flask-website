@@ -15,7 +15,13 @@ conn = mysql.connector.connect(
 
 # create user table
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS personal_info(name VARCHAR(255), gender VARCHAR(255), age INT)")
+# add primary key to this table in order not to store the same info
+cursor.execute("CREATE TABLE IF NOT EXISTS \
+                personal_info(\
+                  name      VARCHAR(255), \
+                  gender    VARCHAR(255), \
+                  age       INT, \
+                  PRIMARY KEY (name, gender, age));") 
 cursor.close()
 
 
@@ -37,7 +43,8 @@ def submit():
 
     # inser user info
     cursor = conn.cursor()
-    cursor.execute(f'INSERT INTO personal_info VALUE ("{name}","{gender}",{age})')
+    # keep table clean and simple
+    cursor.execute(f'INSERT IGNORE INTO personal_info VALUE ("{name}","{gender}",{age})')
     conn.commit()
     cursor.close()
 
