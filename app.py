@@ -9,7 +9,7 @@ conn = mysql.connector.connect(
     user = "root",
     password = "1q2w3e4r",
     host = "localhost",
-    database = 'personal_info',
+    database = 'flask_website',
     auth_plugin = 'mysql_native_password'
 )
 
