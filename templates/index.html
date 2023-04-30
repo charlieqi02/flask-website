@@ -1,24 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title> Personal Information Release </title>
+	<title> Student Information </title>
 </head>
+	<h1> Student information </h1><br>
 <body>
-	<h1> Personal information release </h>
-	<form method="post" action="/submit">
-		<label for="id"> id: </label>
-		<input type="text" id="id" name="id"><br>
-
-		<label for="name"> Name: </label>
-		<input type="text" id="name" name="name"><br>
-		
-		<label for="gender"> Gender: </label>
-		<input type="radio" id="gender" name="gender" value="male"> male
-		<input type="radio" id="gender" name="gender" value="female"> female <br>
-		
-		<label for="age"> Age: </label>
-		<input type="number" id="age" name="age"><br>
-		<input type="submit" value="submit">
-</form>
+	<a href="{{ url_for('add') }}">&rarr; Add info</a><br><br>
+	<a href="{{ url_for('query') }}">&rarr; Query info</a>
 </body>
 </html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Add </title>
+</head>
+<body>
+	<h1> Add student information </h1><br>
+	<form method="post" action="/add/submit">
+		<h2> Add: </h2>
+		<label for="id"> id: </label>
+		<input type="text" id="id" name="id"><br>
+
+		<label for="name"> Name: </label>
+		<input type="text" id="name" name="name"><br>
+		
+		<label for="gender"> Gender: </label>
+		<input type="radio" id="gender" name="gender" value="male"> male
+		<input type="radio" id="gender" name="gender" value="female"> female <br>
+		
+		<label for="age"> Age: </label>
+		<input type="number" id="age" name="age"><br>
+		<input type="submit" value="submit"><br> <br>
+</form>
+	<a href="{{ url_for('index') }}">&larr; Return</a><br>
+	<a href="{{ url_for('query') }}">&rarr; Query info</a>
+</body>
+</html>
