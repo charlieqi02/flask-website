@@ -2,10 +2,26 @@
 <html>
 	<head>
 		<title> Advanced </title>
+		<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 	</head>
 	
 	<body>
 		<h1> Calculus calculator </h1><br>
+		<form method="POST">
+			<label for="expression"> Enter a LaTeX expression: </label><br>
+			<textarea id="expression" name="expression" rows="5" cols="100"></textarea>
+			<input type="submit" value="Calculate">
+		</form><br>
+
+		{% if input %}
+		<label> Input: </label>
+		<p>{{ input|safe }}</p>
+		{% endif %}
+
+		{% if output %}
+		<label> Result: </label>
+		<p>{{ output|safe }}</p><br>
+		{% endif %}
 		
 		<a href="{{ url_for('index') }}">&larr; Return </a><br><br>
 		<a href="{{ url_for('simple') }}">&rarr; Four-rule calculator </a>
