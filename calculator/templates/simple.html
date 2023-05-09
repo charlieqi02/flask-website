@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Simple </title>
+		<style>
+			#result {
+				color: red;
+				font-size: 30px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<h1> Four-rule calculator </h1><br>
+		
+		<label for="expression"> Enter arithmetic expression: </label><br>
+		<input type="text" id="expression">
+		<button onclick="calculate()"> Calculate </button><br><br>
+		<label for="result"> Result: </label><br>
+		<div id="result"></div><br><br>
+
+		<script>
+			function calculate() {
+				var expression = document.getElementById("expression").value;
+				var result = eval(expression);
+				document.getElementById("result").innerHTML = result;
+			}
+		</script>
+
+		<a href="{{ url_for('index') }}">&larr; Return </a><br><br>
+		<a href="{{ url_for('advanced') }}">&rarr; Calculus calculator </a>
+	</body>
+</html>
