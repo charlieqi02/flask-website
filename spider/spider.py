@@ -1,17 +1,19 @@
 import requests                         # for getting the page
-import logging     
+from logColor import LogC
+import logging
 import re                               # for regex
 from urllib.parse import urljoin
 import multiprocessing      
+from store import MysqlS
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = logging.getLogger("Spider")
+logger.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineon)d - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s")
 
 stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.INFO)
+stream_handler.setLevel(logging.DEBUG)
 stream_handler.setFormatter(formatter)
 
 logger.addHandler(stream_handler)
@@ -28,7 +30,7 @@ class Spider():
         # for each page
         self.index_pattern = re.compile('<a.*?href="(.*?)".*?class="name">')
         # for each movie
-        self.cover_pattern = re.compile('class="item.*?<imag.*?src="(.*?)".*?class="cover">', re.S)
+        self.cover_pattern = re.compile('class="item.*?<img.*?src="(.*?)".*?class="cover">', re.S)
         self.name_pattern = re.compile('<h2.*?>(.*?)</h2>')
         self.categories_parttern = re.compile('<button.*?category.*?<span>(.*?)</span>.*?</button>', re.S)
         self.pulished_at_pattern = re.compile('(\d{4}-\d{2}-\d{2})\s?上映')
@@ -36,35 +38,53 @@ class Spider():
         self.score_patterm = re.compile('<p.*?score.*?>(.*?)</p>', re.S)
 
         # for storing info
+        self.mysql = MysqlS()
         
+    
+    def main(self, page):
+        self.mysql.create_table()
+        index_html = self.scrape_index(page)
+        detail_urls = self.parse_index(index_html)
+        for detail_url in detail_urls:
+            detail_html = self.scrape_detail(detail_url)
+            data = self.parse_detail(detail_html)
+            logger.info(LogC.info(f"get detail data {data}"))
+            logger.info(LogC.info("saving data to json file"))
+            logger.info(LogC.info("data saved successfully"))
+        insert_sql = self.mysql.create_insert_sql(cover=data["cover"], name=data["name"], categroies=data["categroies"],
+                                     pulished_at=data["pulished_at"], drama=data["drama"], score=data["score"])
+        logger.debug(LogC.debug(f"insert_sql is {insert_sql}"))
+        self.mysql.insert_info(insert_sql)
 
 
-    def scrape_page(self):
+
+    def scrape_page(self, url):
         """"Get the page, return its HTML"""
-        logger.info(f"scraping {self.url} ...")
+        logger.info(LogC.info(f"scraping {url} ..."))
         try:
-            response = requests.get(self.url)
+            response = requests.get(url, verify=False)
             if response.status_code == requests.codes.ok:
                 return response.text
-            logger.error(f"get invalid status code {response.status_code} while scrape {self.url}")
+            logger.error(LogC.error(f"get invalid status code {response.status_code} while scrape {url}"))
         except requests.RequestException:
-            logger.error(f"error occurred while scrape {self.url}", exc_info=True)
+            logger.error(LogC.error(f"error occurred while scrape {url}", exc_info=True))
 
 
     def scrape_index(self, page):
         """Get each page's URL, and scrape it to get HTML"""
-        index_url = f"{BASE_URL}/page/{page}"
+        index_url = f"{self.url}/page/{page}"
         return self.scrape_page(index_url)
     
 
     def parse_index(self, html):
         """Parse the HTML, get each movie's URL"""
+        logger.debug(LogC.debug(f"index_pattern is : {self.index_pattern}; html is {html[:5] if html is not None else None}"))
         items = re.findall(self.index_pattern, html)
         if not items:
             return []
         for item in items:
-            detail_url = urljoin(BASE_URL, item)
-            logger.info(f"get detail url {detail_url}")
+            detail_url = urljoin(self.url, item)
+            logger.info(LogC.info(f"get detail url {detail_url}"))
             yield detail_url
 
 
@@ -96,3 +116,7 @@ class Spider():
             'drama': drama,
             'score': score,
         }
+    
+
+sd = Spider(BASE_URL)
+sd.main(1)

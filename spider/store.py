@@ -2,16 +2,16 @@ import mysql.connector
 
 
 CREATE_TABLE = "CREATE TABLE IF NOT EXISTS \
-                personal_info(\
-                  name      VARCHAR(255), \
-                  gender    VARCHAR(255), \
-                  age       INT, \
-                  PRIMARY KEY (name, gender, age));"
+                movie_info(\
+                  cover        VARCHAR(100), \
+                  name         VARCHAR(75), \
+                  categroies   VARCHAR(50), \
+                  pulished_at  VARCHAR(20), \
+                  drama        TEXT, \
+                  score        DECIMAL(10, 2));"
 
-INSERT_INFO = 'INSERT IGNORE INTO personal_info VALUE ("{name}","{gender}",{age})'
 
-
-class Mysql():
+class MysqlS():
     def __init__(self):
         # connect to mysql
         self.conn = mysql.connector.connect(user = "root",
@@ -27,8 +27,19 @@ class Mysql():
         cursor.close()
 
     
-    def insert_info(self, sql=INSERT_INFO):
+    def insert_info(self, sql):
         cursor = self.conn.cursor()
         cursor.execute(sql)
-        cursor.commit()
+        self.conn.commit()
         cursor.close()
+
+
+    def create_insert_sql(self, cover, name, categroies, pulished_at, drama, score):
+        insert_sql = f"""INSERT IGNORE INTO movie_info 
+                         VALUE ("{cover}", 
+                                "{name}", 
+                                "{categroies}",
+                                "{pulished_at}",
+                                "{drama}", 
+                                 {score});"""
+        return insert_sql
