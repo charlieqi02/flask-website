@@ -24,10 +24,11 @@ BASE_URL = "https://ssr1.scrape.center"
 TOTAL_PAGE = 10
 SELECT_SQL = "\
     SELECT \n\
-        name, categroies, pulished_at, score, \n\
-        RIGHT(cover, 25) AS cover_simple, \n\
+        LEFT(name, 10) AS name_simple, \n\
+        categroies, pulished_at, score, \n\
+        SUBSTRING(cover, CHAR_LENGTH(cover) - 23, 8) AS cover_simple, \n\
         CONCAT(LEFT(drama, 5), '...', RIGHT(drama, 5)) AS drama_simple \n\
-    FROM \
+    FROM \n\
         movie_info;"
 
 
