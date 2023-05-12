@@ -1,5 +1,5 @@
 import requests                         # for getting the page
-from logColor import LogC
+from colorLog import ColoredFormatter
 import logging
 import re                               # for regex
 from urllib.parse import urljoin
@@ -7,13 +7,14 @@ import multiprocessing
 from store import MysqlS
 
 
+# Set logger
 logger = logging.getLogger("Spider")
 logger.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s")
-
 stream_handler = logging.StreamHandler()
 stream_handler.setLevel(logging.DEBUG)
+
+formatter = ColoredFormatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s")
 stream_handler.setFormatter(formatter)
 
 logger.addHandler(stream_handler)
@@ -48,26 +49,26 @@ class Spider():
         for detail_url in detail_urls:
             detail_html = self.scrape_detail(detail_url)
             data = self.parse_detail(detail_html)
-            logger.info(LogC.info(f"get detail data {data}"))
-            logger.info(LogC.info("saving data to json file"))
-            logger.info(LogC.info("data saved successfully"))
+            logger.info(f"get detail data {data}")
+            logger.info("saving data to json file")
+            logger.info("data saved successfully")
         insert_sql = self.mysql.create_insert_sql(cover=data["cover"], name=data["name"], categroies=data["categroies"],
                                      pulished_at=data["pulished_at"], drama=data["drama"], score=data["score"])
-        logger.debug(LogC.debug(f"insert_sql is {insert_sql}"))
+        logger.debug(f"insert_sql is {insert_sql}")
         self.mysql.insert_info(insert_sql)
 
 
 
     def scrape_page(self, url):
         """"Get the page, return its HTML"""
-        logger.info(LogC.info(f"scraping {url} ..."))
+        logger.info(f"scraping {url} ...")
         try:
             response = requests.get(url, verify=False)
             if response.status_code == requests.codes.ok:
                 return response.text
-            logger.error(LogC.error(f"get invalid status code {response.status_code} while scrape {url}"))
+            logger.error(f"get invalid status code {response.status_code} while scrape {url}")
         except requests.RequestException:
-            logger.error(LogC.error(f"error occurred while scrape {url}", exc_info=True))
+            logger.error(f"error occurred while scrape {url}", exc_info=True)
 
 
     def scrape_index(self, page):
@@ -78,13 +79,13 @@ class Spider():
 
     def parse_index(self, html):
         """Parse the HTML, get each movie's URL"""
-        logger.debug(LogC.debug(f"index_pattern is : {self.index_pattern}; html is {html[:5] if html is not None else None}"))
+        logger.debug(f"index_pattern is : {self.index_pattern}; html is {html[:5] if html is not None else None}")
         items = re.findall(self.index_pattern, html)
         if not items:
             return []
         for item in items:
             detail_url = urljoin(self.url, item)
-            logger.info(LogC.info(f"get detail url {detail_url}"))
+            logger.info(f"get detail url {detail_url}")
             yield detail_url
 
 
