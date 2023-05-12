@@ -8,7 +8,8 @@ CREATE_TABLE = "CREATE TABLE IF NOT EXISTS \
                   categroies   VARCHAR(50), \
                   pulished_at  VARCHAR(20), \
                   drama        TEXT, \
-                  score        DECIMAL(10, 2));"
+                  score        DECIMAL(10, 2), \
+                  PRIMARY KEY (name, pulished_at));"
 
 
 class MysqlS():
@@ -34,12 +35,12 @@ class MysqlS():
         cursor.close()
 
 
-    def create_insert_sql(self, cover, name, categroies, pulished_at, drama, score):
+    def create_insert_sql(self, info_dict):
         insert_sql = f"""INSERT IGNORE INTO movie_info 
-                         VALUE ("{cover}", 
-                                "{name}", 
-                                "{categroies}",
-                                "{pulished_at}",
-                                "{drama}", 
-                                 {score});"""
+                         VALUE ("{info_dict['cover']}", 
+                                "{info_dict['name']}", 
+                                "{info_dict['categroies']}",
+                                "{info_dict['pulished_at']}",
+                                "{info_dict['drama']}", 
+                                 {info_dict['score']});"""
         return insert_sql

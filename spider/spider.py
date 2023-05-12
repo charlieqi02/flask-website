@@ -3,16 +3,15 @@ from colorLog import ColoredFormatter
 import logging
 import re                               # for regex
 from urllib.parse import urljoin
-import multiprocessing      
 from store import MysqlS
 
 
 # Set logger
 logger = logging.getLogger("Spider")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.DEBUG)
+stream_handler.setLevel(logging.INFO)
 
 formatter = ColoredFormatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s")
 stream_handler.setFormatter(formatter)
@@ -20,8 +19,16 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 
+# basic settings
 BASE_URL = "https://ssr1.scrape.center"
 TOTAL_PAGE = 10
+SELECT_SQL = "\
+    SELECT \n\
+        name, categroies, pulished_at, score, \n\
+        RIGHT(cover, 25) AS cover_simple, \n\
+        CONCAT(LEFT(drama, 5), '...', RIGHT(drama, 5)) AS drama_simple \n\
+    FROM \
+        movie_info;"
 
 
 class Spider():
@@ -41,23 +48,39 @@ class Spider():
         # for storing info
         self.mysql = MysqlS()
         
+
+    def main(self, select_sql=True):
+        for page in range(1, TOTAL_PAGE+1):
+            self.get_full_page_info(page)
+        if select_sql:
+            logger.info(f"if you want to see movie data in mysql, try this select sql: \n{SELECT_SQL}")
+        
+
     
-    def main(self, page):
+    def get_full_page_info(self, page):
+        # create table in mysql to store info
         self.mysql.create_table()
+        
+        # get every movie's detail url in a page
         index_html = self.scrape_index(page)
         detail_urls = self.parse_index(index_html)
+
+        # get every movie's info and store them in mysql
         for detail_url in detail_urls:
+            # get movie's info
             detail_html = self.scrape_detail(detail_url)
-            data = self.parse_detail(detail_html)
-            logger.info(f"get detail data {data}")
-            logger.info("saving data to json file")
-            logger.info("data saved successfully")
-        insert_sql = self.mysql.create_insert_sql(cover=data["cover"], name=data["name"], categroies=data["categroies"],
-                                     pulished_at=data["pulished_at"], drama=data["drama"], score=data["score"])
-        logger.debug(f"insert_sql is {insert_sql}")
-        self.mysql.insert_info(insert_sql)
+            data = self.parse_detail(detail_html)            
+            logger.info(f"get detail data {data['name']}")
+            
+            # get insert sql
+            insert_sql = self.mysql.create_insert_sql(data)
+            logger.info(f"get insert sql {insert_sql[:29]}")
 
-
+            # save data
+            self.mysql.insert_info(insert_sql)
+            logger.info("data saved successfully\n")
+        
+        
 
     def scrape_page(self, url):
         """"Get the page, return its HTML"""
@@ -119,5 +142,7 @@ class Spider():
         }
     
 
-sd = Spider(BASE_URL)
-sd.main(1)
+if __name__ == "__main__":
+    requests.packages.urllib3.disable_warnings()
+    sd = Spider()
+    sd.main()
