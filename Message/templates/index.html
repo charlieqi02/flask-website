@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Message </title>
+	</head>
+		
+	<body>
+		<br><strong>Send Message</strong><samll> to the world</samll><br><br>
+		<hr>
+		<form method="post" action="/submit">
+			<label for="name"> Name: </label><br>
+			<textarea id="name" name="name" rows="1" cols="50"></textarea><br><br>
+
+			<label for="body"> Message: </label><br>
+			<textarea id="body" name="body" rows="5" cols="50"></textarea><br><br>
+
+			<input type="submit" value="submit"><br> <br>
+		</form>
+		<hr>
+		<strong>{{ len_of_messages }} messages</strong>
+		{% for message in messages %}
+        <div>
+            {{ message['name'] }} #{{ message['id'] }}<br>
+			{{ message['body'] }}<br>
+			{{ message['timestamp'] }}<br><br>
+        </div>
+    	{% endfor %}
+	</body>
+</html>
